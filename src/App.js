@@ -1,25 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Layout from './components/Layout';
+import Schedule from "./pages/Schedule";
+import TeacherInfo from "./pages/TeacherInfo";
+import RoomBooking from "./pages/RoomBooking";
+import Notification from "./pages/Notification";
+import "./css/modal.css";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+    localStorage.setItem("idNguoiDung", "ND02");
+    localStorage.setItem("vaiTro", "GV");
+    return (
+        <Router>
+            <Layout>
+                <Routes>
+                    <Route path="/giangvien/" element={<Schedule />} />
+                    <Route path="/giangvien/thongtin" element={<TeacherInfo />} />
+                    <Route path="/giangvien/lichgiangday" element={<Schedule />} />
+                    <Route path="/giangvien/datphong" element={<RoomBooking />} />
+                    <Route path="/giangvien/thongbao" element={<Notification />} />
+                </Routes>
+            </Layout>
+        </Router>
+    );
+};
 
 export default App;

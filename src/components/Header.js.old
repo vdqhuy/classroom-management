@@ -1,0 +1,90 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+const headerStyle = {
+  backgroundColor: '#333',
+  color: '#fff',
+  padding: '10px 20px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between'
+};
+
+const navListStyle = {
+  listStyle: 'none',
+  display: 'flex',
+  margin: 0,
+  padding: 0,
+};
+
+const navItemStyle = {
+  margin: '0 15px',
+};
+
+const linkStyle = {
+  textDecoration: 'none',
+  color: '#fff',
+};
+
+// Thêm style cho mục đang active
+const activeLinkStyle = {
+  color: '#61DAFB'
+};
+
+const Header = () => {
+  const location = useLocation(); // Lấy URL hiện tại
+
+  return (
+    <header style={headerStyle}>
+      {/* Logo hoặc tiêu đề chính */}
+      <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
+        Giảng Viên
+      </div>
+
+      {/* Navigator */}
+      <nav>
+        <ul style={navListStyle}>
+          <li style={navItemStyle}>
+            <Link 
+              to="/thongtin" 
+              style={location.pathname === "/thongtin" ? { ...linkStyle, ...activeLinkStyle } : linkStyle}
+            >
+              Thông tin
+            </Link>
+          </li>
+          <li style={navItemStyle}>
+            <Link 
+              to="/lichgiangday" 
+              style={location.pathname === "/lichgiangday" || location.pathname === "/" ? { ...linkStyle, ...activeLinkStyle } : linkStyle}
+            >
+              Lịch giảng dạy
+            </Link>
+          </li>
+          <li style={navItemStyle}>
+            <Link 
+              to="/muonphong" 
+              style={location.pathname === "/muonphong" ? { ...linkStyle, ...activeLinkStyle } : linkStyle}
+            >
+              Mượn phòng
+            </Link>
+          </li>
+          <li style={navItemStyle}>
+            <Link 
+              to="/thongbao" 
+              style={location.pathname === "/thongbao" ? { ...linkStyle, ...activeLinkStyle } : linkStyle}
+            >
+              Thông báo
+            </Link>
+          </li>
+        </ul>
+      </nav>
+
+      {/* Đăng xuất */}
+      <div>
+        <Link to="/dangxuat" style={{ ...linkStyle, fontWeight: 'bold' }}>Đăng xuất</Link>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

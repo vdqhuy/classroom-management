@@ -1,0 +1,106 @@
+main{
+    margin-bottom: 20px;
+}
+.position-zero {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+.header{
+    display: flex;
+    background: linear-gradient(to top, #219EE5, #52B3EB) !important;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+    height: 100px;
+}
+.header-2{
+    display:flex;
+    font-size: 21px;
+}
+.header-2 > *,.header-1 > *{
+    margin: 10px;
+}
+
+.header-1{
+    font-size: 25px;
+    display: flex;
+    margin-left: 40px;
+    justify-content: center;
+    align-items: center;
+}
+/* Hiệu ứng xuất hiện từ từ */
+.header {
+    font-family: "DM Sans", sans-serif;
+    opacity: 0; /* Bắt đầu với độ mờ 0 */
+    transform: translateY(20px); /* Bắt đầu từ vị trí thấp hơn */
+    animation: fadeInUp 0.5s forwards; /* Thêm hiệu ứng */
+}
+
+/* Định nghĩa keyframes cho hiệu ứng */
+@keyframes fadeInUp {
+    to {
+        opacity: 1; /* Độ mờ cuối cùng */
+        transform: translateY(0); /* Về vị trí ban đầu */
+    }
+}
+
+/* Hiệu ứng cho từng phần trong header */
+.header-1, .header-2, .header button {
+    opacity: 0; /* Bắt đầu với độ mờ 0 */
+    transform: translateY(20px); /* Bắt đầu từ vị trí thấp hơn */
+    animation: fadeInUp 0.5s forwards; /* Thêm hiệu ứng */
+    animation-delay: 0.2s; /* Độ trễ cho hiệu ứng */
+}
+
+/* Đặt độ trễ khác nhau cho từng phần */
+.header-1 {
+    animation-delay: 0.3s; /* Độ trễ cho header-1 */
+    transform: translateX(-20px); /* Bắt đầu từ vị trí bên trái */
+}
+
+.header-2 {
+    animation-delay: 0.4s; /* Độ trễ cho header-2 */
+}
+
+.header button {
+    animation-delay: 0.5s; /* Độ trễ cho nút */
+}
+
+.logo {
+    width: 30px; /* Đặt chiều rộng là 30px */
+    height: 30px; /* Đặt chiều cao là 30px */
+}
+main {
+    display: block;
+    min-height: 100vh; /* Đảm bảo có chiều cao đủ để hiển thị nội dung */
+    padding: 10px; /* Giữ khoảng cách đẹp */
+  }
+.btn-dang-suat {
+    background-color: #ea6354; /* Màu nền */
+    color: white;
+    padding: 10px 20px; /* Khoảng cách bên trong */
+    border: none; /* Không có viền */
+    border-radius: 5px; /* Bo góc */
+    cursor: pointer; /* Con trỏ khi di chuột */
+    font-size: 16px; /* Kích thước chữ */
+}
+.btn-dang-suat:hover {
+    background-color: #720707; /* Màu nền khi hover */
+    transform: scale(1.2); /* Tăng kích thước một chút khi hover */
+    transition: background-color 0.3s, transform 0.3s; /* Hiệu ứng chuyển tiếp */
+}
+
+.header-link {
+    margin: 15px;
+    text-decoration: none; 
+    color: inherit; 
+    transition: transform 0.3s;
+}
+
+.header-link:hover {
+    transform: scale(1.15); 
+}

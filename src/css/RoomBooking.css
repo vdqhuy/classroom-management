@@ -1,0 +1,258 @@
+.ant-modal {
+  font-family: 'Arial', sans-serif;
+  max-width: 1100px; /* Giới hạn chiều rộng tối đa của modal */
+}
+
+.ant-modal-content {
+  border-radius: 12px; /* Bo góc mềm mại */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* Đổ bóng nhẹ hiện đại */
+  background-color: #ffffff; /* Màu nền trắng sạch */
+}
+
+.ant-modal-header {
+  background-color: #1890ff; /* Màu xanh đặc trưng của Ant Design */
+  color: white;
+  border-radius: 12px 12px 0 0; /* Bo góc trên cùng */
+  padding: 16px 24px; /* Padding tiêu chuẩn */
+}
+
+.ant-modal-title {
+  font-size: 22px; /* Kích thước chữ tiêu đề lớn hơn một chút */
+  font-weight: 600; /* Độ đậm vừa phải */
+}
+
+.ant-modal-body {
+  padding: 24px; /* Tăng padding cho thoải mái */
+}
+
+.ant-modal-footer {
+  border-top: none; /* Bỏ viền trên của footer */
+  padding: 16px 24px; /* Padding đồng đều */
+  background-color: #fafafa; /* Nền nhạt cho footer */
+  border-radius: 0 0 12px 12px; /* Bo góc dưới cùng */
+}
+
+/* Định dạng cho form trong modal */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Khoảng cách giữa các trường lớn hơn cho thoáng */
+}
+
+/* Định dạng cho các label */
+label {
+  font-weight: 500; /* Đậm nhẹ để dễ đọc */
+  font-size: 16px;
+  color: #333; /* Màu chữ tối nhẹ nhàng */
+  margin-bottom: 6px; /* Khoảng cách dưới label */
+}
+
+/* Định dạng cho các input và select */
+input[type="number"],
+input[type="datetime-local"],
+select {
+  width: 100%;
+  padding: 12px; /* Padding lớn hơn cho dễ nhập liệu */
+  border: 1px solid #d9d9d9; /* Viền nhạt mặc định */
+  border-radius: 6px; /* Bo góc nhẹ */
+  font-size: 16px;
+  background-color: #fafafa; /* Nền nhạt để tăng độ tương phản */
+  transition: all 0.3s ease; /* Hiệu ứng mượt mà */
+}
+
+/* Hiệu ứng khi focus vào input/select */
+input[type="number"]:focus,
+input[type="datetime-local"]:focus,
+select:focus {
+  border-color: #40a9ff; /* Màu viền xanh khi focus */
+  box-shadow: 0 0 6px rgba(64, 169, 255, 0.4); /* Đổ bóng nhẹ khi focus */
+  outline: none;
+}
+
+/* Định dạng radio buttons */
+input[type="radio"] {
+  margin-right: 8px; /* Khoảng cách giữa radio và nhãn */
+}
+
+label input[type="radio"] + span {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Định dạng cho container của lịch sử mượn */
+.container-muon {
+  display: flex;
+  justify-content: space-around;
+}
+
+/* Định dạng cho bảng lịch sử mượn */
+.muon-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.muon-table th,
+.muon-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.muon-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.muon-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.muon-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.muon-table button {
+  margin: 2px;
+}
+
+/* Định dạng cho modal vật tư */
+.vattu-modal .ant-modal {
+  width: 90vw !important; 
+  max-width: 1100px; /* Giới hạn tối đa */
+}
+
+/* Định dạng cho vùng chứa bảng vật tư */
+.vattu-table-container {
+  overflow-x: auto; /* Cuộn ngang nếu bảng quá rộng */
+  width: 100%;
+}
+
+/* Định dạng chung cho bảng vật tư */
+.vattu-table {
+  width: 100%; /* Chiếm toàn bộ chiều rộng */
+  max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.vattu-table th,
+.vattu-table td {
+  border: 1px solid #000000; /* Viền nhạt hơn */
+  padding: 12px 16px; /* Padding thoải mái hơn */
+  text-align: left;
+  white-space: nowrap; /* Tránh chữ bị xuống dòng */
+}
+
+.vattu-table thead {
+  background-color: #f5f5f5; /* Màu nền xám nhạt cho header */
+}
+
+.vattu-table th {
+  font-weight: 600;
+  color: #555;
+}
+
+.vattu-table tr:nth-child(even) {
+  background-color: #fafafa; /* Màu nền xen kẽ nhẹ */
+}
+
+.vattu-table tr:hover {
+  background-color: #e6f7ff; /* Hiệu ứng hover xanh nhạt */
+  transition: background-color 0.2s ease; /* Chuyển màu mượt mà */
+}
+
+/* Định dạng cho button trong bảng vật tư */
+.vattu-table .ant-btn {
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+/* Hiệu ứng hover cho button */
+.ant-btn {
+  border-radius: 6px;
+  transition: all 0.3s ease; /* Hiệu ứng mượt mà */
+}
+
+.ant-btn:hover {
+  transform: translateY(-2px); /* Nâng nhẹ button khi hover */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Đổ bóng khi hover */
+}
+
+@media (max-width: 768px) {
+  .ant-modal {
+    width: 90% !important; 
+    margin: 0 auto;
+  }
+
+  .ant-modal-body {
+    padding: 16px;
+  }
+
+  .ant-modal-title {
+    font-size: 18px; 
+  }
+
+  input[type="number"],
+  input[type="datetime-local"],
+  select {
+    font-size: 14px; 
+    padding: 10px; 
+  }
+
+  .vattu-table th,
+  .vattu-table td {
+    padding: 8px 12px; 
+    font-size: 13px; 
+  }
+
+  form {
+    gap: 15px; 
+  }
+}
+input[type="number"]
+{
+  width: 100%;
+  max-width: 250px; 
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #fafafa;
+}
+input[type="datetime-local"]
+{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #fafafa;
+}
+select {
+  width: 100%;
+  max-width: 275px; 
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #fafafa;
+}
+
+input[type="datetime-local"] {
+  max-width: 250px; 
+}
+
+input[type="datetime-local"]::placeholder {
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  input[type="number"],
+  input[type="datetime-local"],
+  select {
+    max-width: 100%; 
+  }
+}
