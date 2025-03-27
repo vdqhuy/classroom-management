@@ -125,9 +125,16 @@ const BorrowedRoomsList = () => {
     form.resetFields(); // Reset form khi đóng modal
   };
 
-  const sortedBorrowedByUser = [...borrowedByUser].sort((a, b) => {
-    return b.maMuon.localeCompare(a.maMuon);
-  });
+  // const sortedBorrowedByUser = [...borrowedByUser].sort((a, b) => {
+  //   return b.maMuon.localeCompare(a.maMuon);
+  // });
+
+  const sortedBorrowedByUser = [...borrowedByUser].sort((a, b) => 
+    b.maMuon.localeCompare(a.maMuon)
+  );
+  
+  const pastBorrowings = sortedBorrowedByUser.filter(item => item.thoiGianTraThucTe);
+  const upcomingBorrowings = sortedBorrowedByUser.filter(item => !item.thoiGianTraThucTe);
 
   const formatDateTime = (dateTime) => {
     const date = new Date(dateTime);
@@ -143,67 +150,81 @@ const BorrowedRoomsList = () => {
     <>
       {
         <>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <h2>Lịch sử mượn phòng:</h2>
-          </div>
-          <table className="muon-table">
-            <thead>
-              <tr>
-                <th>Mã Mượn</th>
-                <th>Mã Phòng</th>
-                <th>Thời Gian Mượn</th>
-                <th>Thời Gian Trả Dự Tính</th>
-                <th>Thời Gian Trả Thực Tế</th>
-                <th>Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedBorrowedByUser.map((item) => (
-                <tr key={item.maMuon}>
-                  <td>{item.maMuon}</td>
-                  <td>{item.phong.maPhong}</td>
-                  <td>{formatDateTime(item.thoiGianMuon)}</td>
-                  <td>{formatDateTime(item.thoiGianTraDuTinh)}</td>
-                  <td>
-                    {item.thoiGianTraThucTe
-                      ? formatDateTime(item.thoiGianTraThucTe)
-                      : "Chưa trả"}
-                  </td>
-                  <td>
-                    <Button
-                      type="primary"
-                      size="small"
-                      onClick={() => fetchBorrowedSupply(item.maMuon)}
-                    >
-                      Xem vật tư mượn
-                    </Button>
-                    {!item.thoiGianTraThucTe ? (
-                      <Button
-                        type="primary"
-                        danger
-                        size="small"
-                        onClick={() => handleRoomReturn(item.maMuon)}
-                      >
+          {/* Lịch trình mượn trong tương lai */}
+          <div style={{ marginBottom: "20px" }}>
+            <h2>Lịch trình mượn trong tương lai</h2>
+            <table className="muon-table">
+              <thead>
+                <tr>
+                  <th>Mã Mượn</th>
+                  <th>Mã Phòng</th>
+                  <th>Thời Gian Mượn</th>
+                  <th>Thời Gian Trả Dự Tính</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingBorrowings.map((item) => (
+                  <tr key={item.maMuon}>
+                    <td>{item.maMuon}</td>
+                    <td>{item.phong.maPhong}</td>
+                    <td>{formatDateTime(item.thoiGianMuon)}</td>
+                    <td>{formatDateTime(item.thoiGianTraDuTinh)}</td>
+                    <td>
+                      <Button type="primary" size="small" onClick={() => fetchBorrowedSupply(item.maMuon)}>
+                        Xem vật tư mượn
+                      </Button>
+                      <Button type="primary" danger size="small" onClick={() => handleRoomReturn(item.maMuon)}>
                         Trả
                       </Button>
-                    ) : (
+                      <Button type="default" size="small" onClick={() => fetchBorrowIncident(item.maMuon)} style={{ marginLeft: "5px" }}>
+                        Sự cố
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Lịch sử mượn */}
+          <div>
+            <h2>Lịch sử mượn</h2>
+            <table className="muon-table">
+              <thead>
+                <tr>
+                  <th>Mã Mượn</th>
+                  <th>Mã Phòng</th>
+                  <th>Thời Gian Mượn</th>
+                  <th>Thời Gian Trả Dự Tính</th>
+                  <th>Thời Gian Trả Thực Tế</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pastBorrowings.map((item) => (
+                  <tr key={item.maMuon}>
+                    <td>{item.maMuon}</td>
+                    <td>{item.phong.maPhong}</td>
+                    <td>{formatDateTime(item.thoiGianMuon)}</td>
+                    <td>{formatDateTime(item.thoiGianTraDuTinh)}</td>
+                    <td>{formatDateTime(item.thoiGianTraThucTe)}</td>
+                    <td>
+                      <Button type="primary" size="small" onClick={() => fetchBorrowedSupply(item.maMuon)}>
+                        Xem vật tư mượn
+                      </Button>
                       <Button type="default" danger size="small" disabled>
                         Đã Trả
                       </Button>
-                    )}
-                    <Button
-                      type="default"
-                      size="small"
-                      onClick={() => fetchBorrowIncident(item.maMuon)}
-                      style={{ marginLeft: "5px" }}
-                    >
-                      Sự cố
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <Button type="default" size="small" onClick={() => fetchBorrowIncident(item.maMuon)} style={{ marginLeft: "5px" }}>
+                        Sự cố
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       }
 

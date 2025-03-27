@@ -3,6 +3,7 @@ import { getScheduleByUserIdAndWeek } from "../services/scheduleService";
 import '../css/Schedule.css';
 import RoomInfoModal from "../components/room/RoomInfoModal";
 import ScheduleUpdateRequestForm from "../components/schedule/ScheduleUpdateRequestForm"
+import { Button } from "antd";
 
 const getCurrentWeekNumber = () => {
   const today = new Date();
@@ -29,13 +30,12 @@ const getWeekRange = (weekNumber) => {
 const Schedule = () => {
   const [schedule, setSchedule] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(getCurrentWeekNumber());
-  const [selectedRoom, setSelectedRoom] = useState(null); // State cho phòng học được chọn
-  const [isRoomInfoModalOpen, setisRoomInfoModalOpen] = useState(false); // State cho trạng thái modal
-  const [isScheduleUpdateRequestFormOpen, setisScheduleUpdateRequestFormOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const userId = localStorage.getItem("idNguoiDung") || "";
 
-  const occupiedCells = new Set(); // Lưu trữ các ô bị chiếm
+  const occupiedCells = new Set();
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -58,13 +58,8 @@ const Schedule = () => {
   const day = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   const handleRoomClick = (lesson) => {
-    setSelectedRoom(lesson.phong);  // Lưu thông tin phòng vào state
-    setisRoomInfoModalOpen(true);  // Mở modal
-  };
-
-  const handleRescheduleClick = (lesson) => {
     setSelectedRoom(lesson.phong);
-    setisScheduleUpdateRequestFormOpen(true);
+    setIsModalOpen(true);
   };
 
   return (
@@ -117,8 +112,10 @@ const Schedule = () => {
                           Phòng: {lesson.phong.maPhong} <br />
                           Mã môn: {lesson.monHoc.maMon}
                           <div className="lesson-buttons">
-                            <button onClick={() => handleRoomClick(lesson)}>Thông tin phòng</button>
-                            <button onClick={() => handleRescheduleClick(lesson)}>Đổi Lịch</button>
+                            <Button onClick={() => handleRoomClick(lesson)}>Thông tin phòng</Button>
+                            <ScheduleUpdateRequestForm 
+                              lesson={lesson.phong} 
+                            />
                           </div>
                         </div>
                       )}
@@ -131,18 +128,10 @@ const Schedule = () => {
         </table>
       </div>
 
-      {/* Modal cho thông tin phòng */}
       <RoomInfoModal
         roomInfo={selectedRoom}
-        isOpen={isRoomInfoModalOpen}  // Trạng thái mở/đóng của modal
-        onClose={() => setisRoomInfoModalOpen(false)}  // Đóng modal
-      />
-
-      {/* Modal form yêu cầu thay đổi lịch dạy */}
-      <ScheduleUpdateRequestForm
-        roomInfo={selectedRoom}
-        isOpen={isScheduleUpdateRequestFormOpen}  // Trạng thái mở/đóng của modal
-        onClose={() => setisScheduleUpdateRequestFormOpen(false)}  // Đóng modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
     </>
   );
