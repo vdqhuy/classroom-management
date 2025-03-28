@@ -91,14 +91,14 @@ const BorrowedRoomsList = () => {
   // Hàm ghi sự cố mượn mới
   const handleAddSuCo = async (values) => {
     const suCoData = {
-      maMuon: currentMaMuon,
-      benNhan: "ql001", // Mặc định bên nhận là "ql001"
-      benGui: idNguoiMuon, // Người gửi là người dùng hiện tại
-      vaiTroBenGui: "GV", // Mặc định vai trò bên gửi là "GV"
+      muon: { maMuon: currentMaMuon },
+      benNhan: { idNguoiDung: "ND01" }, // Mặc định bên nhận là "ql001"
+      benGui: { idNguoiDung: idNguoiMuon }, // Người gửi là người dùng hiện tại
       tieuDe: values.tieuDe,
       noiDung: values.noiDung,
       thoiGian: new Date().toISOString(), // Thời gian hiện tại
       minhChung: selectedFile ? selectedFile.name : null, // Lưu tên file ảnh
+      tongThietHai: vattuBorrowed.giaVatTu || 0
     };
 
     const addIncidentStatus = setBorrowIncident(suCoData)
@@ -240,7 +240,7 @@ const BorrowedRoomsList = () => {
       {/* Modal cho sự cố mượn */}
       <Modal
         title={hasSuCo ? "Danh sách sự cố mượn" : "Báo cáo sự cố mượn"}
-        visible={isSuCoModalVisible}
+        open={isSuCoModalVisible}
         onCancel={handleCloseSuCoModal}
         footer={hasSuCo ? [<Button key="close" onClick={handleCloseSuCoModal}>Đóng</Button>] : null}
       >
