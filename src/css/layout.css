@@ -19,14 +19,14 @@ main{
 }
 .header-2{
     display:flex;
-    font-size: 21px;
+    font-size: 20px;
 }
 .header-2 > *,.header-1 > *{
     margin: 10px;
 }
 
 .header-1{
-    font-size: 25px;
+    font-size: 22px;
     display: flex;
     margin-left: 40px;
     justify-content: center;

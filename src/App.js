@@ -14,6 +14,7 @@ const App = () => {
         <Router>
             <Layout>
                 <Routes>
+                    <Route path="/" element={<Schedule />} />
                     <Route path="/giangvien/" element={<Schedule />} />
                     <Route path="/giangvien/thongtin" element={<TeacherInfo />} />
                     <Route path="/giangvien/lichgiangday" element={<Schedule />} />

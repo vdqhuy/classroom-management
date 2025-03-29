@@ -1,6 +1,6 @@
 import React from "react";
-import { Modal, Button } from "antd";
-import { setBorrowedSupplyReturn } from "../../services/roomService"
+import { Modal } from "antd";
+// import { setBorrowedSupplyReturn } from "../../services/roomService"
 
 const BorrowedItemsModal = ({
   isVisible,
@@ -10,20 +10,20 @@ const BorrowedItemsModal = ({
   currentMaMuon,
 }) => {
 
-  const handleReturn = async (borrowSupplyId) => {
-    try {
-      const supplyReturnData = await setBorrowedSupplyReturn(borrowSupplyId)
-      console.log(supplyReturnData)
-      if (supplyReturnData) {
-        alert("Trả vật tư thành công!");
-        onClose()
-        fetchBorrowHistory();
-      }
-    } catch (error) {
-      alert("Lỗi khi trả vật tư!");
-      console.error("Error returning item:", error.response || error.message);
-    }
-  };
+  // const handleReturn = async (borrowSupplyId) => {
+  //   try {
+  //     const supplyReturnData = await setBorrowedSupplyReturn(borrowSupplyId)
+  //     console.log(supplyReturnData)
+  //     if (supplyReturnData) {
+  //       alert("Trả vật tư thành công!");
+  //       onClose()
+  //       fetchBorrowHistory();
+  //     }
+  //   } catch (error) {
+  //     alert("Lỗi khi trả vật tư!");
+  //     console.error("Error returning item:", error.response || error.message);
+  //   }
+  // };
   const formatDateTime = (dateTime) => {
     const date = new Date(dateTime); 
     const day = String(date.getDate()).padStart(2, '0'); 
@@ -71,18 +71,20 @@ const BorrowedItemsModal = ({
                   <td>{formatDateTime(item.thoiGianTraThucTe) || "Chưa trả"}</td>
                   <td>
                     {item.thoiGianTraThucTe ? (
-                      <Button type="default" size="small" disabled>
-                        Đã Trả
-                      </Button>
+                      <span>Đã trả</span>
+                      // <Button type="default" size="small" disabled>
+                      //   Đã Trả
+                      // </Button>
                     ) : (
-                      <Button
-                        type="primary"
-                        danger
-                        size="small"
-                        onClick={() => handleReturn(item.maMuonVatTu)}
-                      >
-                        Trả
-                      </Button>
+                      <span>Chưa trả</span>
+                      // <Button
+                      //   type="primary"
+                      //   danger
+                      //   size="small"
+                      //   onClick={() => handleReturn(item.maMuonVatTu)}
+                      // >
+                      //   Trả
+                      // </Button>
                     )}
                   </td>
                 </tr>

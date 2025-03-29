@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Modal, Button } from "antd";
 import VattuList from "./VattuList";
 import "../../css/RoomBooking.css";
-import { getBorrowHistoryByUser, getBorrowedSupplyByMuon, getRoom, getVatTuByMaPhong, borrowRoomAndSupply } from "../../services/roomService"
+import { getBorrowHistoryByUser, getRoom, getVatTuByMaPhong, borrowRoomAndSupply } from "../../services/roomService"
+// getBorrowedSupplyByMuon
 
 const RoomBorrowForm = () => {
+  const [selectedSupplies, setSelectedSupplies] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState("");
   const [vattu, setVattu] = useState([]);
@@ -21,6 +23,8 @@ const RoomBorrowForm = () => {
     returnTime: "",
     vattu: [],
   });
+  const [timeConflictError, setTimeConflictError] = useState(false);
+  const [conflictingBorrows, setConflictingBorrows] = useState([]);
   const [roomType, setRoomType] = useState("");
   const [modalWidth, setModalWidth] = useState(550);
 
@@ -65,32 +69,69 @@ const RoomBorrowForm = () => {
   useEffect(() => {
     fetchData();
   }, [selectedRoom, fetchData]);
-  const checkIfAllReturned = async () => {
-    fetchData();
-    const hasOutstandingRooms = borrowedByUser.some(
-      (item) => !item.thoiGianTraThucTe
-    );
-    let hasOutstandingItems = false;
-    for (const borrow of borrowedByUser) {
-      if (!borrow.thoiGianTraThucTe) {
-        try {
-          const items = await await getBorrowedSupplyByMuon(borrow.maMuon)
-          if (items.some((item) => !item.thoiGianTraThucTe)) {
-            hasOutstandingItems = true;
-            break;
-          }
-        } catch (error) {
-          console.error(
-            "Lỗi khi kiểm tra vật tư mượn:",
-            error.response || error.message
-          );
-          alert("Lỗi khi kiểm tra vật tư mượn!");
-          return false;
-        }
-      }
+  
+  // const checkIfAllReturned = async () => {
+  //   fetchData();
+  //   const hasOutstandingRooms = borrowedByUser.some(
+  //     (item) => !item.thoiGianTraThucTe
+  //   );
+  //   let hasOutstandingItems = false;
+  //   for (const borrow of borrowedByUser) {
+  //     if (!borrow.thoiGianTraThucTe) {
+  //       try {
+  //         const items = await await getBorrowedSupplyByMuon(borrow.maMuon)
+  //         if (items.some((item) => !item.thoiGianTraThucTe)) {
+  //           hasOutstandingItems = true;
+  //           break;
+  //         }
+  //       } catch (error) {
+  //         console.error(
+  //           "Lỗi khi kiểm tra vật tư mượn:",
+  //           error.response || error.message
+  //         );
+  //         alert("Lỗi khi kiểm tra vật tư mượn!");
+  //         return false;
+  //       }
+  //     }
+  //   }
+  //   return !(hasOutstandingRooms || hasOutstandingItems);
+  // };
+
+  const checkTimeConflict = useCallback(() => {
+    if (!borrowFormData.borrowTime || !borrowFormData.returnTime || !borrowFormData.selectedRoom) {
+      setTimeConflictError(false);
+      setConflictingBorrows([]);
+      return;
     }
-    return !(hasOutstandingRooms || hasOutstandingItems);
-  };
+  
+    const newBorrowStart = new Date(borrowFormData.borrowTime);
+    const newBorrowEnd = new Date(borrowFormData.returnTime);
+  
+    if (!borrowedByUser || borrowedByUser.length === 0) {
+      setTimeConflictError(false);
+      setConflictingBorrows([]);
+      return;
+    }
+  
+    // Giả sử danh sách các khoản mượn hiện tại được lưu ở state existingBorrows
+    const conflicts = borrowedByUser.filter((borrow) => {
+      if (borrow.phong.maPhong === borrowFormData.selectedRoom) {
+        const existingStart = new Date(borrow.thoiGianMuon);
+        const existingEnd = new Date(borrow.thoiGianTraDuTinh);
+        
+        // Kiểm tra khoảng thời gian có trùng không
+        return (
+          (newBorrowStart >= existingStart && newBorrowStart < existingEnd) || // Bắt đầu mới nằm trong khoảng
+          (newBorrowEnd > existingStart && newBorrowEnd <= existingEnd) || // Kết thúc mới nằm trong khoảng
+          (newBorrowStart <= existingStart && newBorrowEnd >= existingEnd) // Bao phủ hoàn toàn
+        );
+      }
+      return false;
+    });
+  
+    setTimeConflictError(conflicts.length > 0);
+    setConflictingBorrows(conflicts);
+  }, [borrowFormData, borrowedByUser]);
 
   const fetchRooms = async (seats, type) => {
     try {
@@ -131,19 +172,20 @@ const RoomBorrowForm = () => {
   };
 
   const showBorrowForm = async () => {
-    const allReturned = await checkIfAllReturned();
-    if (allReturned) {
-      setIsBorrowFormVisible(true);
-      setModalWidth(550);
-    } else {
-      alert(
-        "Bạn phải trả hết tất cả các phòng và vật tư đã mượn trước khi mượn phòng mới!"
-      );
-    }
+    setIsBorrowFormVisible(true);
+    setModalWidth(550);
+    // const allReturned = await checkIfAllReturned();
+    // if (allReturned) {
+    //   setIsBorrowFormVisible(true);
+    //   setModalWidth(550);
+    // } else {
+    //   alert(
+    //     "Bạn phải trả hết tất cả các phòng và vật tư đã mượn trước khi mượn phòng mới!"
+    //   );
+    // }
   };
 
   const hideBorrowForm = () => {
-    console.log("hideBorrowForm called");
     setIsBorrowFormVisible(false);
     setBorrowFormData({
       numSeats: 0,
@@ -160,6 +202,11 @@ const RoomBorrowForm = () => {
   };
 
   const handleBorrowFormSubmit = async () => {
+    if (timeConflictError) {
+      alert("⚠️ Không thể mượn phòng! Thời gian đã bị trùng với lượt mượn khác.");
+      return;
+    }
+
     if (
       !borrowFormData.selectedRoom ||
       !borrowFormData.borrowTime ||
@@ -220,6 +267,28 @@ const RoomBorrowForm = () => {
     }
     window.location.reload();
   };
+
+  // Xác định tiết học dựa trên thời gian
+  const getPeriodFromTime = (time) => {
+    if (!time) return "Chưa xác định";
+
+    const date = new Date(time);
+    const startTime = new Date(date);
+    startTime.setHours(7, 30, 0, 0); // Tiết 1 bắt đầu 07:30
+
+    const diffMinutes = (date - startTime) / (1000 * 60);
+    if (diffMinutes < 0) return "Ngoài giờ";
+
+    const period = Math.floor(diffMinutes / 60) + 1;
+    return period > 14 ? "Ngoài giờ" : `Tiết ${period}`;
+  };
+
+  const borrowPeriod = getPeriodFromTime(borrowFormData.borrowTime);
+  const returnPeriod = getPeriodFromTime(borrowFormData.returnTime);
+
+  useEffect(() => {
+    checkTimeConflict();
+  }, [borrowFormData.borrowTime, borrowFormData.returnTime, borrowFormData.selectedRoom, checkTimeConflict]);
 
   return (
     <>
@@ -300,6 +369,9 @@ const RoomBorrowForm = () => {
                 onChange={handleBorrowFormChange}
                 min={new Date().toISOString().slice(0, 16)}
               />
+              <div style={{ marginTop: "5px" }}>
+                <strong>Số tiết tương ứng: {borrowPeriod}</strong>
+              </div>
             </div>
             <div>
               <label style={{ marginRight: "11px" }}>Thời gian trả dự tính:</label>
@@ -310,12 +382,27 @@ const RoomBorrowForm = () => {
                 onChange={handleBorrowFormChange}
                 min={borrowFormData.borrowTime}
               />
+              <div style={{ marginTop: "5px" }}>
+                <strong>Số tiết tương ứng: {returnPeriod}</strong>
+              </div>
             </div>
+            {timeConflictError && (
+              <div style={{ color: "red", marginTop: "10px" }}>
+                <p>⚠️ Phòng đã được mượn trong khoảng thời gian này!</p>
+                <ul>
+                  {conflictingBorrows.map((borrow, index) => (
+                    <li key={index}>
+                      Từ <b>{new Date(borrow.thoiGianMuon).toLocaleString()}</b> đến <b>{new Date(borrow.thoiGianTraDuTinh).toLocaleString()}</b>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </form>
         </div>
         {selectedRoom && vattu.length > 0 && (
           <div style={{ flex: 1 }}>
-            <VattuList vattu={vattu} setMuon={setMuon} Muon={muon} />
+            <VattuList vattu={vattu} setMuon={setMuon} Muon={muon} selectedSupplies={selectedSupplies} setSelectedSupplies={setSelectedSupplies} />
           </div>
         )}
       </Modal>

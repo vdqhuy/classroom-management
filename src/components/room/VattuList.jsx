@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "antd";
 
-const VattuList = ({ vattu, setMuon, Muon }) => {
+const VattuList = ({ vattu, setMuon, Muon, selectedSupplies, setSelectedSupplies }) => {
   const [localQuantities, setLocalQuantities] = useState({});
+  // const [selectedSupplies, setSelectedSupplies] = useState([]);
 
   useEffect(() => {
     setLocalQuantities({});
@@ -24,6 +25,26 @@ const VattuList = ({ vattu, setMuon, Muon }) => {
     }
   };
 
+  // const handleAddBorrowSupply = (event, chiaVatTu) => {
+  //   if (event.target.checked) {
+  //     // Nếu checkbox được check, thêm supply vào danh sách
+  //     setSelectedSupplies((prev) => [...prev, { 
+  //       idVt: chiaVatTu.idVt, 
+  //       maPhong: chiaVatTu.maPhong, 
+  //       vatTu: chiaVatTu.vatTu,
+  //       loaiVatTu: chiaVatTu.loaiVatTu,
+  //       soLuong: chiaVatTu.soLuong 
+  //     }]);
+  //   } else {
+  //     // Nếu bỏ check, loại bỏ supply khỏi danh sách
+  //     setSelectedSupplies((prev) => prev.filter((item) => item.idVt !== chiaVatTu.idVt));
+  //   }
+  // };
+
+  useEffect(() => {
+    console.log("Selected Supplies Updated:", selectedSupplies);
+  }, [selectedSupplies]); // Sẽ chạy mỗi khi selectedSupplies thay đổi
+
   return (
     <div>
       <h3>Danh sách vật tư</h3>
@@ -32,10 +53,11 @@ const VattuList = ({ vattu, setMuon, Muon }) => {
           <table className="vattu-table">
             <thead>
               <tr>
+                {/* <th></th> */}
                 <th>Tên VT</th>
                 <th>Số lượng còn lại</th>
                 <th>Mã Phòng</th>
-                <th>Số lượng mượn</th>
+                <th>Số lượng</th>
               </tr>
             </thead>
             <tbody>
@@ -48,6 +70,13 @@ const VattuList = ({ vattu, setMuon, Muon }) => {
                       backgroundColor: item.maPhong ? "lightblue" : "lightpink",
                     }}
                   >
+                    {/* <td>
+                      <input
+                        type="checkbox"
+                        onChange={(event) => handleAddBorrowSupply(event, item)}
+                        checked={selectedSupplies.some((s) => s.idVt === item.idVt)}
+                      />
+                    </td> */}
                     <td>{item.vatTu.tenVt}</td>
                     <td>{remainingQuantity}</td>
                     <td>{item.maPhong || "Tự do"}</td>
