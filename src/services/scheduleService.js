@@ -47,3 +47,13 @@ export const getScheduleByUserIdAndMonth = async (userId, month) => {
       throw error;
     }
 }
+
+export const updateSchedule = async (maTkb, updatedSchedule) => {
+  try {
+      const response = await axios.put(`${API_URL}/capnhat/${maTkb}`, updatedSchedule);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch giảng dạy", error);
+      throw error;
+    }
+}

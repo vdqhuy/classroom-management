@@ -229,9 +229,9 @@ const RoomBorrowForm = () => {
           newMuon[item.idVt] = item.soLuong;
         }
       });
-      console.log("Dữ liệu newMuon sau khi xử lý:", newMuon);
       updatedMuon = { ...updatedMuon, ...newMuon }; 
       setMuon(updatedMuon);
+      console.log(borrowFormData)
     } catch (error) {
       alert("Lỗi khi lấy vật tư: " + (error.response?.data || error.message));
       return;
@@ -266,7 +266,7 @@ const RoomBorrowForm = () => {
       alert("Lỗi khi mượn: " + (error.response?.data || error.message));
     }
     window.location.reload();
-  };
+};
 
   // Xác định tiết học dựa trên thời gian
   const getPeriodFromTime = (time) => {

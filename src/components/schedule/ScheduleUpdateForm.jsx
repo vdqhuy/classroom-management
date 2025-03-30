@@ -3,10 +3,12 @@ import { Modal, Button } from "antd";
 import VattuList from "../room/VattuList";
 import "../../css/RoomBooking.css";
 import { getBorrowHistoryByUser, getRoom, getVatTuByMaPhong } from "../../services/roomService"
+import { updateSchedule } from "../../services/scheduleService";
 // getBorrowedSupplyByMuon
 // borrowRoomAndSupply
 
-const ScheduleChangeRequestForm = (lesson) => {
+const ScheduleChangeForm = ({ selectedLesson, setSelectedLesson, lesson }) => {
+    // console.log(selectedLesson)
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState("");
     const [vattu, setVattu] = useState([]);
@@ -16,26 +18,46 @@ const ScheduleChangeRequestForm = (lesson) => {
     const [numSeats, setNumSeats] = useState("");
     const idNguoiMuon = localStorage.getItem("idNguoiDung") || "";
     const [isBorrowFormVisible, setIsBorrowFormVisible] = useState(false);
-    const [borrowFormData, setBorrowFormData] = useState({
-      numSeats: "",
-      selectedRoom: "",
-      borrowTime: "",
-      returnTime: "",
-      vattu: [],
-    });
+    // const [borrowFormData, setBorrowFormData] = useState({
+    //   numSeats: "",
+    //   selectedRoom: "",
+    //   borrowTime: "",
+    //   returnTime: "",
+    //   vattu: [],
+    // });
     const [roomType, setRoomType] = useState("");
     const [modalWidth, setModalWidth] = useState(550);
     const [formData, setFormData] = useState({
-      phong: "",
-      lopHoc: "", // Giá trị mặc định
-      monHoc: "", // Giá trị mặc định
-      giangVien: "", // Giá trị mặc định
+      phong: { maPhong: "" },
+      lopHoc: { maLop: "" },
+      monHoc: { maMon: "" },
+      giangVien: { maGv: "" },
       thuTrongTuan: "",
-      tietBatDau: "",
-      tietKetThuc: "",
-      tuan: "",
+      tietBatDau: null,
+      tietKetThuc: null,
+      tuan: null,
       ngayHoc: "",
+      muon: { maMuon: "" }
     });
+    
+    // Cập nhật formData khi selectedLesson thay đổi
+    useEffect(() => {
+      if (selectedLesson) {
+        setFormData({
+          phong: { maPhong: selectedRoom || "" },
+          lopHoc: { maLop: selectedLesson?.lopHoc?.maLop || "" },
+          monHoc: { maMon: selectedLesson?.monHoc?.maMon || "" },
+          giangVien: { maGv: selectedLesson?.giangVien?.maGv || "" },
+          thuTrongTuan: selectedLesson?.thuTrongTuan || "",
+          tietBatDau: selectedLesson?.tietBatDau ?? null,
+          tietKetThuc: selectedLesson?.tietKetThuc ?? null,
+          tuan: selectedLesson?.tuan ?? null,
+          ngayHoc: selectedLesson?.ngayHoc || "",
+          muon: { maMuon: selectedLesson?.muon.maMuon || null }
+        });
+      }
+    }, [selectedLesson, selectedRoom]); // Chạy lại khi `selectedLesson` thay đổi
+
   
     const fetchVattu = useCallback(async () => {
       if (selectedRoom) {
@@ -78,6 +100,7 @@ const ScheduleChangeRequestForm = (lesson) => {
     useEffect(() => {
       fetchData();
     }, [selectedRoom, fetchData]);
+
     // const checkIfAllReturned = async () => {
     //   fetchData();
     //   const hasOutstandingRooms = borrowedByUser.some(
@@ -124,7 +147,8 @@ const ScheduleChangeRequestForm = (lesson) => {
     const handleNumSeatsChange = (e) => {
       const newNumSeats = e.target.value;
       setNumSeats(newNumSeats);
-      setBorrowFormData((prev) => ({ ...prev, numSeats: newNumSeats }));
+      // setBorrowFormData((prev) => ({ ...prev, numSeats: newNumSeats }));
+      setFormData((prev) => ({ ...prev, numSeats: newNumSeats }));
       if (newNumSeats && roomType) fetchRooms(newNumSeats, roomType);
     };
   
@@ -137,32 +161,35 @@ const ScheduleChangeRequestForm = (lesson) => {
   
     const handleBorrowFormChange = (e) => {
       const { name, value } = e.target;
-      setBorrowFormData((prev) => ({ ...prev, [name]: value }));
+      // setBorrowFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
       if (name === "selectedRoom"){
         setSelectedRoom(value)
       };
     };
   
     const showBorrowForm = async () => {
+        if (setSelectedLesson)
+          console.log(lesson)
+          setSelectedLesson(lesson)
         setIsBorrowFormVisible(true);
         setModalWidth(550);
-        console.log(lesson)
         // const allReturned = await checkIfAllReturned();
         // if (allReturned) {
         //   setIsBorrowFormVisible(true);
         //   setModalWidth(550);
-        //   // Giả sử dữ liệu trong form nếu có lesson
-        //   if (lesson) {
+        //   // Giả sử dữ liệu trong form nếu có selectedLesson
+        //   if (selectedLesson) {
         //     setBorrowFormData({
-        //       numSeats: lesson.sucChua || "", 
-        //       selectedRoom: lesson.maPhong || "",
+        //       numSeats: selectedLesson.sucChua || "", 
+        //       selectedRoom: selectedLesson.maPhong || "",
         //       borrowTime: new Date().toISOString().slice(0, 16), // Thời gian hiện tại
         //       returnTime: "", // Có thể đặt mặc định hoặc để trống
-        //       vattu: lesson.vattu || [],
+        //       vattu: selectedLesson.vattu || [],
         //     });
-        //     setNumSeats(lesson.sucChua || "");
-        //     setSelectedRoom(lesson.maPhong || "");
-        //     setRoomType(lesson.loaiPhong || "");
+        //     setNumSeats(selectedLesson.sucChua || "");
+        //     setSelectedRoom(selectedLesson.maPhong || "");
+        //     setRoomType(selectedLesson.loaiPhong || "");
         //   }
         // } else {
         //   alert(
@@ -175,12 +202,17 @@ const ScheduleChangeRequestForm = (lesson) => {
     const hideBorrowForm = () => {
       console.log("hideBorrowForm called");
       setIsBorrowFormVisible(false);
-      setBorrowFormData({
-        numSeats: 0,
-        selectedRoom: "",
-        borrowTime: "",
-        returnTime: "",
-        vattu: [],
+      setFormData({
+        phong: { maPhong: selectedLesson?.phong?.maPhong || "" },
+        lopHoc: { maLop: selectedLesson?.lopHoc?.maLop || "" },
+        monHoc: { maMon: selectedLesson?.monHoc?.maMon || "" },
+        giangVien: { maGv: selectedLesson?.giangVien?.maGv || "" },
+        thuTrongTuan: selectedLesson?.thuTrongTuan || "",
+        tietBatDau: selectedLesson?.tietBatDau ?? null,
+        tietKetThuc: selectedLesson?.tietKetThuc ?? null,
+        tuan: selectedLesson?.tuan ?? null,
+        ngayHoc: selectedLesson?.ngayHoc || "",
+        muon: { maMuon: selectedLesson?.muon.maMuon || null }
       });
       setNumSeats(0);
       setMuon({});
@@ -191,91 +223,48 @@ const ScheduleChangeRequestForm = (lesson) => {
   
     const handleScheduleUpdate = async () => {
       try {
-          // Tạo object chứa dữ liệu cần gửi
-          const updatedLesson = {
-              maTkb: lesson.maTkb,  // Giữ nguyên mã thời khóa biểu
-              phong: { maPhong: formData.phong }, // Chỉ gửi mã phòng
-              ngayHoc: formData.ngayHoc, 
-              tietBatDau: formData.tietBatDau, 
-              tietKetThuc: formData.tietKetThuc
-          };
-
-          console.log("Dữ liệu gửi lên:", updatedLesson);
-
-          // Gửi request đến API (đổi URL phù hợp với backend)
-          const response = await fetch("https://your-api.com/update-schedule", {
-              method: "PUT", // Hoặc "POST" nếu cần tạo mới
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(updatedLesson),
-          });
-
-          if (!response.ok) {
-              throw new Error("Cập nhật thất bại!");
-          }
-
-          // Nếu thành công, hiển thị thông báo & đóng modal
-          alert("Cập nhật thành công!");
-          hideBorrowForm();
+        const data = await updateSchedule(lesson.maTkb, formData)
+        alert('Cập nhật thành công:', data);
+        window.location.reload();
       } catch (error) {
-          console.error("Lỗi khi cập nhật:", error);
-          alert("Có lỗi xảy ra! Vui lòng thử lại.");
+        alert('Lỗi cập nhật lịch:', error);
       }
     };
 
-    useEffect(() => {
-        if (isBorrowFormVisible && lesson) {
-          setBorrowFormData({
-            numSeats: lesson.sucChua || "",
-            selectedRoom: lesson.maPhong || "",
-            borrowTime: new Date().toISOString().slice(0, 16),
-            returnTime: "",
-            vattu: lesson.vattu || [],
-          });
-          setNumSeats(lesson.sucChua || "");
-          setSelectedRoom(lesson.maPhong || "");
-          setRoomType(lesson.loaiPhong || "");
-        }
-      }, [isBorrowFormVisible, lesson]);
-      
       const getThuTrongTuan = (date) => {
         const ngay = new Date(date);
         const thu = ngay.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
-        return thu === 0 ? "CN" : `Thứ ${thu + 1}`;
+        const thuMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        return thuMap[thu];
       };
-    
-      const getTuanHoc = (date) => {
+
+      const getTuanHocISO = (date) => {
         const ngay = new Date(date);
+        
+        // Lấy thứ của ngày đầu năm (0 = Chủ Nhật, 1 = Thứ Hai, ..., 6 = Thứ Bảy)
         const oneJan = new Date(ngay.getFullYear(), 0, 1);
-        const dayOfYear = Math.floor((ngay - oneJan) / 86400000) + 1;
+        const dayOfWeek = oneJan.getDay(); 
+    
+        // Điều chỉnh để thứ Hai là ngày đầu tuần (ISO 8601)
+        const offset = (dayOfWeek <= 4) ? dayOfWeek - 1 : dayOfWeek - 8;
+    
+        // Tính số ngày trong năm kể từ ngày 4/1 (tuần 1 của ISO 8601)
+        const dayOfYear = Math.floor((ngay - oneJan + offset * 86400000) / 86400000) + 1;
+    
+        // Tính tuần theo ISO 8601
         return Math.ceil(dayOfYear / 7);
-      };      
+    };
     
       const handleDateChange = (e) => {
         const { name, value } = e.target;
         if (name === "ngayHoc") {
           const thu = getThuTrongTuan(value);
-          const tuan = getTuanHoc(value);
+          const tuan = getTuanHocISO(value);
           setFormData({ ...formData, ngayHoc: value, thuTrongTuan: thu, tuan });
         } else {
           setFormData({ ...formData, [name]: value });
         }
       };
-
-      useEffect(() => {
-        if (lesson) {
-            setFormData({
-                phong: lesson.phong?.maPhong || "", // Mã phòng
-                lopHoc: lesson.lopHoc?.tenLop || "", // Tên lớp
-                monHoc: lesson.monHoc?.tenMon || "", // Tên môn học
-                giangVien: lesson.giangVien?.nguoiDung?.hoTen || "", // Tên giảng viên
-                thuTrongTuan: lesson.thuTrongTuan || "",
-                tietBatDau: lesson.tietBatDau || "",
-                tietKetThuc: lesson.tietKetThuc || "",
-                tuan: lesson.tuan || "",
-                ngayHoc: lesson.ngayHoc || "",
-            });
-        }
-      }, [lesson]);
   
     return (
       <>
@@ -301,6 +290,10 @@ const ScheduleChangeRequestForm = (lesson) => {
           <div style={{ flex: 1, paddingRight: "20px" }}>
             <form>
               <div>
+                <div>
+                  <label><strong>Phòng đang mượn: </strong> {selectedLesson?.phong?.maPhong}</label>
+                </div>
+                <br></br>
                 <label>
                   <input
                     type="radio"
@@ -328,7 +321,7 @@ const ScheduleChangeRequestForm = (lesson) => {
                   type="number"
                   name="numSeats"
                   min="1"
-                  value={borrowFormData.numSeats}
+                  value={formData.phong.sucChua}
                   onChange={handleNumSeatsChange}
                 />
               </div>
@@ -337,7 +330,8 @@ const ScheduleChangeRequestForm = (lesson) => {
                 <select
                   className="selectroom"
                   name="selectedRoom"
-                  value={borrowFormData.selectedRoom}
+                  defaultValue={formData.phong.maPhong}
+                  value={selectedRoom}
                   onChange={handleBorrowFormChange}
                   disabled={!roomType || !numSeats}
                 >
@@ -349,20 +343,20 @@ const ScheduleChangeRequestForm = (lesson) => {
                   ))}
                 </select>
               </div>
-              <label>
-                Ngày học:
+              <div>
+                <label style={{ marginRight: "90px" }}>Ngày học:</label>
                 <input type="date" name="ngayHoc" value={formData.ngayHoc} onChange={handleDateChange} required />
-              </label>
-              <p><strong>Thứ trong tuần:</strong> {formData.thuTrongTuan || "Chọn ngày học"}</p>
-              <p><strong>Tuần:</strong> {formData.tuan || "Chọn ngày học"}</p>
-              <label>
-                Tiết bắt đầu:
+              </div>
+              <label><strong>Thứ trong tuần:</strong> {formData.thuTrongTuan || "Chọn ngày học"}</label>
+              <label><strong>Tuần:</strong> {formData.tuan || "Chọn ngày học"}</label>
+              <div>
+                <label style={{ marginRight: "75px" }}>Tiết bắt đầu:</label>
                 <input type="number" name="tietBatDau" value={formData.tietBatDau} onChange={handleDateChange} required />
-              </label>
-              <label>
-                Tiết kết thúc:
+              </div>
+              <div>
+                <label style={{ marginRight: "75px" }}>Tiết kết thúc:</label>
                 <input type="number" name="tietKetThuc" value={formData.tietKetThuc} onChange={handleDateChange} required />
-              </label>
+              </div>
             </form>
           </div>
           {selectedRoom && vattu.length > 0 && (
@@ -375,4 +369,4 @@ const ScheduleChangeRequestForm = (lesson) => {
     );
   };
 
-export default ScheduleChangeRequestForm;
+export default ScheduleChangeForm;

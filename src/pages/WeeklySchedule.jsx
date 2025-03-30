@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getScheduleByUserIdAndWeek } from "../services/scheduleService";
 import '../css/Schedule.css';
 import RoomInfoModal from "../components/room/RoomInfoModal";
-import ScheduleUpdateRequestForm from "../components/schedule/ScheduleUpdateForm";
+import ScheduleUpdateForm from "../components/schedule/ScheduleUpdateForm";
 import { Button } from "antd";
 
 const getCurrentWeekNumber = () => {
@@ -32,6 +32,8 @@ const WeeklySchedule = () => {
   const [currentWeek, setCurrentWeek] = useState(getCurrentWeekNumber());
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+
 
   const userId = localStorage.getItem("idNguoiDung") || "";
 
@@ -111,8 +113,10 @@ const WeeklySchedule = () => {
                           Môn: {lesson.monHoc.tenMon} ({lesson.monHoc.maMon})
                           <div className="lesson-buttons">
                             <Button onClick={() => handleRoomClick(lesson)}>Thông tin phòng</Button>
-                            <ScheduleUpdateRequestForm 
-                              lesson={lesson} 
+                            <ScheduleUpdateForm 
+                              selectedLesson={selectedLesson}
+                              setSelectedLesson = {setSelectedLesson}
+                              lesson = {lesson}
                             />
                           </div>
                         </div>
