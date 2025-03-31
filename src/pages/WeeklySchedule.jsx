@@ -7,8 +7,17 @@ import { Button } from "antd";
 
 const getCurrentWeekNumber = () => {
   const today = new Date();
+  // Lấy thứ của ngày đầu năm (0 = Chủ Nhật, 1 = Thứ Hai, ..., 6 = Thứ Bảy)
   const oneJan = new Date(today.getFullYear(), 0, 1);
-  const dayOfYear = Math.floor((today - oneJan) / 86400000) + 1;
+  const dayOfWeek = oneJan.getDay(); 
+
+  // Điều chỉnh để thứ Hai là ngày đầu tuần (ISO 8601)
+  const offset = (dayOfWeek <= 4) ? dayOfWeek - 1 : dayOfWeek - 8;
+
+  // Tính số ngày trong năm kể từ ngày 4/1 (tuần 1 của ISO 8601)
+  const dayOfYear = Math.floor((today - oneJan + offset * 86400000) / 86400000) + 1;
+
+  // Tính tuần theo ISO 8601
   return Math.ceil(dayOfYear / 7);
 };
 
