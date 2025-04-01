@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { getBorrowHistoryByUser, setRoomReturn, getBorrowedSupplyByMuon, getBorrowIncidentByMaMuon, setBorrowIncident } from "../../services/roomService"
 import { Button, Modal, Form, Input, message } from "antd";
 import BorrowedItemsModal from "./BorrowedItemsModal";
+import { uploadImage } from "../../services/firebaseStorageService"; // Import hàm tải ảnh lên Firebase
 
 const { TextArea } = Input;
 
@@ -79,12 +80,21 @@ const BorrowedRoomsList = () => {
     }
   };
 
-  // Hàm xử lý khi người dùng chọn file ảnh
-  const handleFileChange = (e) => {
+  // Hàm xử lý khi người dùng chọn file ảnh và upload lên Firebase
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      form.setFieldsValue({ minhChung: file.name }); // Hiển thị tên file trong form
+      try {
+        const uploadResult = await uploadImage(file);
+        if (uploadResult.success) {
+          setSelectedFile(file);
+          form.setFieldsValue({ minhChung: uploadResult.message }); // Hiển thị URL file trong form
+          message.success("Tải ảnh lên thành công!");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải ảnh lên:", error.message);
+        message.error("Tải ảnh lên thất bại!");
+      }
     }
   };
 
@@ -101,14 +111,20 @@ const BorrowedRoomsList = () => {
       tongThietHai: vattuBorrowed.giaVatTu || 0
     };
 
-    const addIncidentStatus = setBorrowIncident(suCoData)
-    if (addIncidentStatus) {
+    const uploadResult = await uploadImage(selectedFile); // Tải ảnh lên Firebase
+    if (uploadResult.success) {
+      suCoData.minhChung = uploadResult.message.replace("File uploaded successfully: ", ""); // Lưu URL ảnh vào dữ liệu sự cố
+      const addIncidentStatus = await setBorrowIncident(suCoData); // Đợi kết quả của uploadResult trước khi thực hiện
+      if (addIncidentStatus) {
       message.success("Thêm sự cố thành công!");
       setIsSuCoModalVisible(false);
       setSelectedFile(null); // Reset file sau khi gửi
       fetchBorrowIncident(currentMaMuon); // Làm mới danh sách sự cố
-    } else {
+      } else {
       message.error("Thêm sự cố thất bại!");
+      }
+    } else {
+      message.error("Tải ảnh lên thất bại!");
     }
   };
 
@@ -239,74 +255,93 @@ const BorrowedRoomsList = () => {
 
       {/* Modal cho sự cố mượn */}
       <Modal
-        title={hasSuCo ? "Danh sách sự cố mượn" : "Báo cáo sự cố mượn"}
-        open={isSuCoModalVisible}
-        onCancel={handleCloseSuCoModal}
-        footer={hasSuCo ? [<Button key="close" onClick={handleCloseSuCoModal}>Đóng</Button>] : null}
+  title={hasSuCo ? "Danh sách sự cố mượn" : "Báo cáo sự cố mượn"}
+  open={isSuCoModalVisible}
+  onCancel={handleCloseSuCoModal}
+  footer={null}
+>
+  {hasSuCo ? (
+    <div>
+      {suCoList.map((suCo) => (
+        <div
+          key={suCo.idSucoMuon}
+          style={{
+            border: "1px solid #ddd",
+            padding: "10px",
+            marginBottom: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          <p><strong>Tiêu đề:</strong> {suCo.tieuDe}</p>
+          <p><strong>Nội dung:</strong> {suCo.noiDung}</p>
+          <p><strong>Thời gian:</strong> {formatDateTime(suCo.thoiGian)}</p>
+          <p><strong>Minh chứng:</strong></p>
+          {suCo.minhChung ? (
+            <img
+              src={suCo.minhChung}
+              alt="Minh chứng"
+              style={{ maxWidth: "100%", maxHeight: "200px" }}
+            />
+          ) : (
+            "Không có"
+          )}
+          <p><strong>Bên gửi:</strong> {suCo.benGui.hoTen} ({suCo.benGui.vaiTro.tenVaiTro})</p>
+          <p><strong>Bên nhận:</strong> {suCo.benNhan.hoTen} (Admin)</p>
+          <p><strong>Tổng thiệt hại:</strong> {suCo.tongThietHai}</p>
+        </div>
+      ))}
+      <Button
+        type="primary"
+        onClick={() => {
+          form.resetFields();
+          setSelectedFile(null);
+          setHasSuCo(false); // Chuyển sang trạng thái hiển thị form
+        }}
       >
-        {hasSuCo ? (
-          <div>
-            {suCoList.map((suCo) => (
-              <div
-                key={suCo.idSucoMuon}
-                style={{
-                  border: "1px solid #ddd",
-                  padding: "10px",
-                  marginBottom: "10px",
-                  borderRadius: "5px",
-                }}
-              >
-                <p><strong>Tiêu đề:</strong> {suCo.tieuDe}</p>
-                <p><strong>Nội dung:</strong> {suCo.noiDung}</p>
-                <p><strong>Thời gian:</strong> {formatDateTime(suCo.thoiGian)}</p>
-                <p><strong>Minh chứng:</strong> {suCo.minhChung || "Không có"}</p>
-                <p><strong>Bên gửi:</strong> {suCo.benGui.hoTen} ({suCo.benGui.vaiTro.tenVaiTro})</p>
-                <p><strong>Bên nhận:</strong> {suCo.benNhan.hoTen} (Admin)</p>
-                <p><strong>Tổng thiệt hại:</strong> {suCo.tongThietHai}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Form
-            form={form}
-            onFinish={handleAddSuCo}
-            layout="vertical"
-          >
-            <Form.Item
-              label="Tiêu đề"
-              name="tieuDe"
-              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Nội dung"
-              name="noiDung"
-              rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-            >
-              <TextArea rows={4} />
-            </Form.Item>
-            <Form.Item
-              label="Minh chứng (chọn ảnh từ thiết bị)"
-              name="minhChung"
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              {selectedFile && (
-                <p>Đã chọn: {selectedFile.name}</p>
-              )}
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Gửi sự cố
-              </Button>
-            </Form.Item>
-          </Form>
+        Báo cáo thêm sự cố
+      </Button>
+    </div>
+  ) : (
+    <Form
+      form={form}
+      onFinish={handleAddSuCo}
+      layout="vertical"
+    >
+      <Form.Item
+        label="Tiêu đề"
+        name="tieuDe"
+        rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
+        label="Nội dung"
+        name="noiDung"
+        rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+      >
+        <TextArea rows={4} />
+      </Form.Item>
+      <Form.Item
+        label="Minh chứng (chọn ảnh từ thiết bị)"
+        name="minhChung"
+      >
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+        {selectedFile && (
+          <p>Đã chọn: {selectedFile.name}</p>
         )}
-      </Modal>
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Gửi sự cố
+        </Button>
+      </Form.Item>
+    </Form>
+  )}
+</Modal>
     </>
   );
 };

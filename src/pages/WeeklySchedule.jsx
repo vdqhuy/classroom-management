@@ -78,7 +78,7 @@ const WeeklySchedule = () => {
         <div className="schedule-header">
           <h2>Tuần {currentWeek} ({getWeekRange(currentWeek)})</h2>
           <div>
-            <button onClick={goToPreviousWeek}>⬅ Tuần trước</button>
+            <button style={{marginRight: "10px"}} onClick={goToPreviousWeek}>⬅ Tuần trước</button>
             <button onClick={goToNextWeek}>Tuần sau ➡</button>
           </div>
         </div>

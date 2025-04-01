@@ -22,22 +22,6 @@ const TeacherInfo = () => {
     }, [userId]);
 
     return (
-        // <>
-        //     <Header />
-        //     <div>
-        //         {teacher ? (
-        //             <div>
-        //                 <p><strong>Họ và Tên:</strong> {teacher.hoTen}</p>
-        //                 <p><strong>Liên hệ:</strong> {teacher.lienHe}</p>
-        //                 <p><strong>Email:</strong> {teacher.email}</p>
-        //                 <p><strong>Giới tính:</strong> {teacher.gioiTinh}</p>
-        //                 <p><strong>Khoa:</strong> {teacher.khoa}</p>
-        //             </div>
-        //         ) : (
-        //             <p>Đang tải...</p>
-        //         )}
-        //     </div>
-        // </>
         <div className="teacher-info">
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
@@ -55,15 +39,35 @@ const TeacherInfo = () => {
                         <p className='info-style'>Giới tính: <span className='spacing4'>{user.gioiTinh}</span></p>
                         <p className='info-style'>Khoa: <span className='spacing2'>{teacher.khoa}</span></p>
                     </div>
-                    {teacher.avatarUrl && (
-                        <img src={`${teacher.avatarUrl}`} alt="Avatar"/>
+                    {user.avatarUrl && (
+                        <img 
+                            src={`${user.avatarUrl}`} 
+                            alt="Avatar" 
+                            style={{ 
+                                width: '300px', 
+                                height: '400px', 
+                                objectFit: 'cover', 
+                                borderRadius: '10px', 
+                                border: '2px solid #ccc' 
+                            }}
+                        />
                     )}
                     </div>
                 </div>
                 <br></br>
                 <div style={{ position: 'relative', height: '100px' }}>
-                    <img src="https://png.pngtree.com/png-clipart/20240115/original/pngtree-crystal-ball-highly-transparent-spherical-ai-element-three-dimensional-buckle-free-png-image_14115172.png" className="bouncing-ball2 ball1" alt="Bouncing Ball 1" />
-                    <img src="https://png.pngtree.com/png-clipart/20240610/original/pngtree-magic-sphere-beautiful-glitter-crystal-ball-fantasy-png-image_15298983.png" className="bouncing-ball1 ball2" alt="Bouncing Ball 2" />
+                    <img 
+                        src="https://png.pngtree.com/png-clipart/20240115/original/pngtree-crystal-ball-highly-transparent-spherical-ai-element-three-dimensional-buckle-free-png-image_14115172.png" 
+                        className="bouncing-ball2 ball1" 
+                        alt="Bouncing Ball 1" 
+                        style={{ width: '50px', height: '50px', objectFit: 'contain' }}
+                    />
+                    <img 
+                        src="https://png.pngtree.com/png-clipart/20240610/original/pngtree-magic-sphere-beautiful-glitter-crystal-ball-fantasy-png-image_15298983.png" 
+                        className="bouncing-ball1 ball2" 
+                        alt="Bouncing Ball 2" 
+                        style={{ width: '50px', height: '50px', objectFit: 'contain' }}
+                    />
                 </div>
             </>
             ) : (

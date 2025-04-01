@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Select, Button, DatePicker } from "antd";
 import { getScheduleByUserIdAndWeekDetail } from "../services/scheduleService";
 import RoomInfoModal from "../components/room/RoomInfoModal";
-import ScheduleUpdateRequestForm from "../components/schedule/ScheduleUpdateForm";
+import ScheduleUpdateForm from "../components/schedule/ScheduleUpdateForm";
 import "../css/Schedule.css";
 import moment from "moment";
 
@@ -30,6 +30,7 @@ const DailySchedule = () => {
   const [schedule, setSchedule] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   const userId = localStorage.getItem("idNguoiDung") || "";
 
@@ -90,26 +91,38 @@ const DailySchedule = () => {
         </thead>
         <tbody>
           {Array.from({ length: 14 }, (_, i) => i + 1).map((period) => {
-            const lesson = schedule.find((item) => item.tietBatDau === period);
+            const lesson = schedule.find(
+              (item) => period >= item.tietBatDau && period <= item.tietKetThuc
+            );
+
+            // Kiểm tra nếu đây là tiết bắt đầu của lesson
+            const isStartPeriod = lesson && period === lesson.tietBatDau;
 
             return (
               <tr key={period}>
                 <td>{`Tiết ${period}`}</td>
-                <td className={lesson ? "schedule-cell" : ""}>
-                  {lesson ? (
+                {isStartPeriod ? (
+                  <td
+                    className={lesson ? "schedule-cell" : ""}
+                    rowSpan={lesson.tietKetThuc - lesson.tietBatDau + 1}
+                  >
                     <div>
                       <b>Lớp: {lesson.lopHoc.maLop}</b> <br />
                       Phòng: {lesson.phong.maPhong} <br />
                       Mã môn: {lesson.monHoc.tenMon} ({lesson.monHoc.maMon})
                       <div className="lesson-buttons">
                         <Button onClick={() => handleRoomClick(lesson)}>Thông tin phòng</Button>
-                        <ScheduleUpdateRequestForm lesson={lesson} />
+                        <ScheduleUpdateForm 
+                          selectedLesson={selectedLesson}
+                          setSelectedLesson = {setSelectedLesson}
+                          lesson = {lesson}
+                        />
                       </div>
                     </div>
-                  ) : (
-                    "Không có lịch"
-                  )}
-                </td>
+                  </td>
+                ) : lesson ? null : (
+                  <td>Không có lịch</td>
+                )}
               </tr>
             );
           })}
