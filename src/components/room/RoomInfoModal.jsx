@@ -30,43 +30,66 @@ const RoomInfoModal = ({ isOpen, onClose, roomInfo }) => {
     };
 
     return (
-        <>
-        <Modal
-          title={
-            <div style={{ textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>
-              Thông tin phòng
-            </div>
-          }
-          visible={isOpen}
-          onCancel={onClose}
-          footer={null} // Remove the default footer provided by antd
-          width={600}
-          centered // Ensures the modal is vertically centered
-        >
-          <div className="modal-body">
-            <div>
-              <label>Mã phòng:</label>
-              <span>{roomInfo.maPhong}</span>
-            </div>
-            <div>
-              <label>Loại phòng:</label>
-              <span>{getRoomType(roomInfo.loaiPhong)}</span>
-            </div>
-            <div>
-              <label>Trạng thái:</label>
-              <span>{getStatusText(roomInfo.trangThai)}</span>
-            </div>
-            <div>
-              <label>Sức chứa:</label>
-              <span>{roomInfo.sucChua}</span>
-            </div>
-          </div>
-          <div className="modal-footer">
-            <button className="modal-footer-button" onClick={onClose}>
-              Đóng
-            </button>
-          </div>
-        </Modal>
+      <>
+      <Modal
+      title={
+      <div style={{ textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>
+      Thông tin phòng
+      </div>
+      }
+      visible={isOpen}
+      onCancel={onClose}
+      footer={null} // Remove the default footer provided by antd
+      width={600}
+      centered // Ensures the modal is vertically centered
+      >
+      <div className="modal-body">
+      <div>
+      <label>Mã phòng:</label>
+      <span>{roomInfo.maPhong}</span>
+      </div>
+      <div>
+      <label>Loại phòng:</label>
+      <span>{getRoomType(roomInfo.loaiPhong)}</span>
+      </div>
+      <div>
+      <label>Trạng thái:</label>
+      <span>{getStatusText(roomInfo.trangThai)}</span>
+      </div>
+      <div>
+      <label>Sức chứa:</label>
+      <span>{roomInfo.sucChua}</span>
+      </div>
+      </div>
+      <div className="modal-footer">
+      <button
+      className="modal-footer-button"
+      onClick={onClose}
+      style={{
+      backgroundColor: 'red',
+      color: 'white',
+      cursor: 'pointer',
+      transition: 'background-color 0.3s',
+      }}
+      onMouseEnter={(e) => e.target.style.backgroundColor = 'darkred'}
+      onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+      >
+      Đóng
+      </button>
+      <button
+      className="modal-footer-button"
+      onClick={() => alert('Xem vật tư')}
+      style={{
+      color: 'white',
+      cursor: 'pointer',
+      marginLeft: '10px',
+      transition: 'background-color 0.3s',
+      }}
+      >
+      Xem vật tư
+      </button>
+      </div>
+      </Modal>
       </>
     );
 };
