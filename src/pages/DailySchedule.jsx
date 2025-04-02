@@ -48,6 +48,7 @@ const DailySchedule = () => {
   }, [userId, selectedDay, selectedWeek]);
 
   const handleRoomClick = (lesson) => {
+    setSelectedLesson(lesson);
     setSelectedRoom(lesson.phong);
     setIsModalOpen(true);
   };
@@ -130,6 +131,7 @@ const DailySchedule = () => {
       </table>
 
       <RoomInfoModal
+        selectedLesson={selectedLesson}
         roomInfo={selectedRoom}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

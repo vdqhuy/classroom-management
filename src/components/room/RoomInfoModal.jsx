@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../css/Schedule.css"; // CSS tùy chỉnh cho modal
 import { Modal } from "antd";
+import { getBorrowedSupplyByMuon } from "../../services/roomService"; // Import hàm lấy dữ liệu vật tư mượn
+import BorrowedItemsModal from "./BorrowedItemsModal"; // Import modal cho vật tư mượn
 
-const RoomInfoModal = ({ isOpen, onClose, roomInfo }) => {
+const RoomInfoModal = ({ isOpen, onClose, roomInfo, selectedLesson }) => {
+    const [isModalVisible, setIsModalVisible] = useState(false); // Modal cho vật tư mượn
+    const [borrowedSupplyList, setBorrowedSupplyList] = useState([]); // Danh sách vật tư mượn
+
     if (!isOpen) return null;
 
     const getRoomType = (roomType) => {
@@ -26,6 +31,20 @@ const RoomInfoModal = ({ isOpen, onClose, roomInfo }) => {
             return "Bảo trì";
             default:
             return status;  // Trường hợp trạng thái khác
+        }
+    };
+
+    const fetchBorrowedSupply = async (maMuon) => {
+        try {
+          const borrowedSupplyData = await getBorrowedSupplyByMuon(maMuon)
+          setBorrowedSupplyList(borrowedSupplyData); // Cập nhật danh sách vật tư mượn
+          console.log(borrowedSupplyData)
+          setIsModalVisible(true); // Mở modal cho vật tư mượn
+        } catch (error) {
+          console.error(
+            "Lỗi khi lấy dữ liệu vật tư mượn:",
+            error.response || error.message
+          );
         }
     };
 
@@ -66,19 +85,19 @@ const RoomInfoModal = ({ isOpen, onClose, roomInfo }) => {
       className="modal-footer-button"
       onClick={onClose}
       style={{
-      backgroundColor: 'red',
+      backgroundColor: '#ea6354',
       color: 'white',
       cursor: 'pointer',
       transition: 'background-color 0.3s',
       }}
       onMouseEnter={(e) => e.target.style.backgroundColor = 'darkred'}
-      onMouseLeave={(e) => e.target.style.backgroundColor = 'red'}
+      onMouseLeave={(e) => e.target.style.backgroundColor = '#ea6354'}
       >
       Đóng
       </button>
       <button
       className="modal-footer-button"
-      onClick={() => alert('Xem vật tư')}
+      onClick={() => fetchBorrowedSupply(selectedLesson.muon.maMuon)}
       style={{
       color: 'white',
       cursor: 'pointer',
@@ -90,7 +109,14 @@ const RoomInfoModal = ({ isOpen, onClose, roomInfo }) => {
       </button>
       </div>
       </Modal>
-      </>
+
+        {/* Modal cho vật tư mượn */}
+        <BorrowedItemsModal
+            isVisible={isModalVisible}
+            vattuBorrowed={borrowedSupplyList}
+            onClose={() => setIsModalVisible(false)}
+        />
+    </>
     );
 };
 

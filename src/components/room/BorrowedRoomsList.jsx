@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getBorrowHistoryByUser, setRoomReturn, getBorrowedSupplyByMuon, getBorrowIncidentByMaMuon, setBorrowIncident } from "../../services/roomService"
-import { Button, Modal, Form, Input, message } from "antd";
+import { Button, Modal, Form, Input, message, Radio } from "antd";
 import BorrowedItemsModal from "./BorrowedItemsModal";
 import { uploadImage } from "../../services/firebaseStorageService"; // Import hàm tải ảnh lên Firebase
 
@@ -63,6 +63,19 @@ const BorrowedRoomsList = () => {
     }
   };
 
+  const fetchBorrowedSupplyForIncident = async (maMuon) => {
+    try {
+      const borrowedSupplyData = await getBorrowedSupplyByMuon(maMuon)
+      setVattuBorrowed(borrowedSupplyData);
+      setCurrentMaMuon(maMuon);
+    } catch (error) {
+      console.error(
+        "Lỗi khi lấy dữ liệu vật tư mượn:",
+        error.response || error.message
+      );
+    }
+  };
+
   // Hàm lấy danh sách sự cố mượn theo mã mượn
   const fetchBorrowIncident = async (maMuon) => {
     try {
@@ -100,6 +113,18 @@ const BorrowedRoomsList = () => {
 
   // Hàm ghi sự cố mượn mới
   const handleAddSuCo = async (values) => {
+    // Tìm vật tư được chọn dựa trên giá trị trong trường "selectedVattu"
+    const selectedItem = vattuBorrowed.find(
+      (item) => item.chiaVatTu.vatTu.tenVt === values.selectedVattu
+    );
+  
+    let tongThietHai = 0;
+    if (selectedItem) {
+      const soLuongNhap = Number(values.soLuongNhap);
+      const giaVatTu = selectedItem.chiaVatTu.vatTu.giaVatTu;
+      tongThietHai = soLuongNhap * giaVatTu;
+    }
+  
     const suCoData = {
       muon: { maMuon: currentMaMuon },
       benNhan: { idNguoiDung: "ND01" }, // Mặc định bên nhận là "ql001"
@@ -108,25 +133,27 @@ const BorrowedRoomsList = () => {
       noiDung: values.noiDung,
       thoiGian: new Date().toISOString(), // Thời gian hiện tại
       minhChung: selectedFile ? selectedFile.name : null, // Lưu tên file ảnh
-      tongThietHai: vattuBorrowed.giaVatTu || 0
+      tongThietHai: tongThietHai, // Tổng thiệt hại tính từ số lượng nhập * giá vật tư
     };
-
+  
+    // Tiếp tục xử lý upload ảnh và gửi dữ liệu sự cố...
     const uploadResult = await uploadImage(selectedFile); // Tải ảnh lên Firebase
     if (uploadResult.success) {
-      suCoData.minhChung = uploadResult.message.replace("File uploaded successfully: ", ""); // Lưu URL ảnh vào dữ liệu sự cố
-      const addIncidentStatus = await setBorrowIncident(suCoData); // Đợi kết quả của uploadResult trước khi thực hiện
+      suCoData.minhChung = uploadResult.message.replace("File uploaded successfully: ", "");
+      const addIncidentStatus = await setBorrowIncident(suCoData); // Gửi dữ liệu sự cố
       if (addIncidentStatus) {
-      message.success("Thêm sự cố thành công!");
-      setIsSuCoModalVisible(false);
-      setSelectedFile(null); // Reset file sau khi gửi
-      fetchBorrowIncident(currentMaMuon); // Làm mới danh sách sự cố
+        message.success("Thêm sự cố thành công!");
+        setIsSuCoModalVisible(false);
+        setSelectedFile(null); // Reset file sau khi gửi
+        fetchBorrowIncident(currentMaMuon); // Làm mới danh sách sự cố
       } else {
-      message.error("Thêm sự cố thất bại!");
+        message.error("Thêm sự cố thất bại!");
       }
     } else {
       message.error("Tải ảnh lên thất bại!");
     }
   };
+  
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
@@ -255,93 +282,168 @@ const BorrowedRoomsList = () => {
 
       {/* Modal cho sự cố mượn */}
       <Modal
-  title={hasSuCo ? "Danh sách sự cố mượn" : "Báo cáo sự cố mượn"}
-  open={isSuCoModalVisible}
-  onCancel={handleCloseSuCoModal}
-  footer={null}
->
-  {hasSuCo ? (
-    <div>
-      {suCoList.map((suCo) => (
-        <div
-          key={suCo.idSucoMuon}
-          style={{
-            border: "1px solid #ddd",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "5px",
-          }}
-        >
-          <p><strong>Tiêu đề:</strong> {suCo.tieuDe}</p>
-          <p><strong>Nội dung:</strong> {suCo.noiDung}</p>
-          <p><strong>Thời gian:</strong> {formatDateTime(suCo.thoiGian)}</p>
-          <p><strong>Minh chứng:</strong></p>
-          {suCo.minhChung ? (
-            <img
-              src={suCo.minhChung}
-              alt="Minh chứng"
-              style={{ maxWidth: "100%", maxHeight: "200px" }}
-            />
-          ) : (
-            "Không có"
-          )}
-          <p><strong>Bên gửi:</strong> {suCo.benGui.hoTen} ({suCo.benGui.vaiTro.tenVaiTro})</p>
-          <p><strong>Bên nhận:</strong> {suCo.benNhan.hoTen} (Admin)</p>
-          <p><strong>Tổng thiệt hại:</strong> {suCo.tongThietHai}</p>
-        </div>
-      ))}
-      <Button
-        type="primary"
-        onClick={() => {
-          form.resetFields();
-          setSelectedFile(null);
-          setHasSuCo(false); // Chuyển sang trạng thái hiển thị form
-        }}
+        title={hasSuCo ? "Danh sách sự cố mượn" : "Báo cáo sự cố mượn"}
+        open={isSuCoModalVisible}
+        onCancel={handleCloseSuCoModal}
+        footer={null}
       >
-        Báo cáo thêm sự cố
-      </Button>
-    </div>
-  ) : (
-    <Form
-      form={form}
-      onFinish={handleAddSuCo}
-      layout="vertical"
-    >
-      <Form.Item
-        label="Tiêu đề"
-        name="tieuDe"
-        rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        label="Nội dung"
-        name="noiDung"
-        rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
-      >
-        <TextArea rows={4} />
-      </Form.Item>
-      <Form.Item
-        label="Minh chứng (chọn ảnh từ thiết bị)"
-        name="minhChung"
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-        {selectedFile && (
-          <p>Đã chọn: {selectedFile.name}</p>
+        {hasSuCo ? (
+          <div>
+            {suCoList.map((suCo) => (
+              <div
+                key={suCo.idSucoMuon}
+                style={{
+                  border: "1px solid #ddd",
+                  padding: "10px",
+                  marginBottom: "10px",
+                  borderRadius: "5px",
+                }}
+              >
+                <p><strong>Tiêu đề:</strong> {suCo.tieuDe}</p>
+                <p><strong>Nội dung:</strong> {suCo.noiDung}</p>
+                <p><strong>Thời gian:</strong> {formatDateTime(suCo.thoiGian)}</p>
+                <p><strong>Minh chứng:</strong></p>
+                {suCo.minhChung ? (
+                  <img
+                    src={suCo.minhChung}
+                    alt="Minh chứng"
+                    style={{ maxWidth: "100%", maxHeight: "200px" }}
+                  />
+                ) : (
+                  "Không có"
+                )}
+                <p><strong>Bên gửi:</strong> {suCo.benGui.hoTen} ({suCo.benGui.vaiTro.tenVaiTro})</p>
+                <p><strong>Bên nhận:</strong> {suCo.benNhan.hoTen} (Admin)</p>
+                <p><strong>Tổng thiệt hại:</strong> {suCo.tongThietHai}</p>
+              </div>
+            ))}
+            <Button
+              type="primary"
+              onClick={() => {
+                form.resetFields();
+                setSelectedFile(null);
+                setHasSuCo(false); // Chuyển sang trạng thái hiển thị form
+                fetchBorrowedSupplyForIncident(currentMaMuon);
+              }}
+            >
+              Báo cáo thêm sự cố
+            </Button>
+          </div>
+        ) : (
+          <Form
+            form={form}
+            onFinish={handleAddSuCo}
+            layout="vertical"
+          >
+            <Form.Item
+              label="Tiêu đề"
+              name="tieuDe"
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Nội dung"
+              name="noiDung"
+              rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
+            >
+              <TextArea rows={4} />
+            </Form.Item>
+
+            {/* Tùy chọn loại sự cố */}
+            <Form.Item
+              label="Sự cố gì?"
+              name="loaiSuCo"
+              rules={[{ required: true, message: "Vui lòng chọn loại sự cố!" }]}
+            >
+              <Radio.Group>
+                <Radio value="CHUNG">Sự cố chung</Radio>
+                <Radio value="VATTU">Sự cố vật tư</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            {/* Hiển thị danh sách vật tư nếu chọn Sự cố vật tư */}
+            <Form.Item shouldUpdate>
+              {() =>
+                form.getFieldValue("loaiSuCo") === "VATTU" && (
+                  <>
+                    <Form.Item
+                      label="Danh sách vật tư"
+                      name="selectedVattu"
+                      rules={[{ required: true, message: "Vui lòng chọn vật tư!" }]}
+                    >
+                      <Radio.Group>
+                        {vattuBorrowed.map((item, index) => (
+                          <Radio key={index} value={item.chiaVatTu.vatTu.tenVt}>
+                            {item.chiaVatTu.vatTu.tenVt} - Số lượng: {item.chiaVatTu.soLuong} - Giá: {item.chiaVatTu.vatTu.giaVatTu} - Tổng giá trị:{" "}
+                            {item.chiaVatTu.soLuong * item.chiaVatTu.vatTu.giaVatTu}
+                          </Radio>
+                        ))}
+                      </Radio.Group>
+                    </Form.Item>
+                    <Form.Item
+                      label="Nhập số lượng"
+                      name="soLuongNhap"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập số lượng!" },
+                        ({ getFieldValue }) => ({
+                          validator(rule, value) {
+                            const selectedItem = vattuBorrowed.find(
+                              (item) => item.chiaVatTu.vatTu.tenVt === getFieldValue("selectedVattu")
+                            );
+                            if (selectedItem && value > selectedItem.chiaVatTu.soLuong) {
+                              return Promise.reject(
+                                new Error(`Số lượng không vượt quá ${selectedItem.chiaVatTu.soLuong}`)
+                              );
+                            }
+                            return Promise.resolve();
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input
+                        type="number"
+                        placeholder="Nhập số lượng"
+                        onChange={(e) => {
+                          const soLuongNhap = Number(e.target.value);
+                          const selectedVattu = form.getFieldValue("selectedVattu");
+                          if (selectedVattu) {
+                            const selectedItem = vattuBorrowed.find(
+                              (item) => item.chiaVatTu.vatTu.tenVt === selectedVattu
+                            );
+                            if (selectedItem) {
+                              form.setFieldsValue({
+                                tongGiaTri: soLuongNhap * selectedItem.chiaVatTu.vatTu.giaVatTu,
+                              });
+                            }
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </>
+                )
+              }
+            </Form.Item>
+            <Form.Item
+              label="Minh chứng (chọn ảnh từ thiết bị)"
+              name="minhChung"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {selectedFile && <p>Đã chọn: {selectedFile.name}</p>}
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Gửi sự cố
+              </Button>
+            </Form.Item>
+          </Form>
+
         )}
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Gửi sự cố
-        </Button>
-      </Form.Item>
-    </Form>
-  )}
-</Modal>
+      </Modal>
     </>
   );
 };
