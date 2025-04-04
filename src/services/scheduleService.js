@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getTeacherByUser } from "./teacherInfoService"
+import { getTeacherByUser } from "./userInfoService"
 
 const API_URL = "http://localhost:8080/api/thoikhoabieu";
 
@@ -17,6 +17,7 @@ export const getScheduleByUserIdAndWeek = async (userId, week) => {
   try {
       const giangvien = await getTeacherByUser(userId)
       const response = await axios.get(`${API_URL}/giangvien/${giangvien.maGv}?tuan=${week}`);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error("Lỗi khi lấy lịch giảng dạy", error);

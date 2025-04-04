@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Select, Button, DatePicker } from "antd";
 import { getScheduleByUserIdAndWeekDetail } from "../services/scheduleService";
+import { getStudentListByClassId } from "../services/userInfoService";
 import RoomInfoModal from "../components/room/RoomInfoModal";
+import ClassInfoModal from "../components/ClassInfoModal";
 import ScheduleUpdateForm from "../components/schedule/ScheduleUpdateForm";
 import "../css/Schedule.css";
 import moment from "moment";
@@ -31,6 +33,9 @@ const DailySchedule = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(false);
+  const [studentList, setStudentList] = useState([]);
+  const [showModalClassInfo, setShowModalClassInfo] = useState(false);
 
   const userId = localStorage.getItem("idNguoiDung") || "";
 
@@ -52,6 +57,30 @@ const DailySchedule = () => {
     setSelectedRoom(lesson.phong);
     setIsModalOpen(true);
   };
+
+  const handleClassClick = (classInfo) => {
+    console.log("Class Clicked", classInfo);
+    handleShowClassInfo();
+    setSelectedClass(classInfo);
+    fetchStudentList(classInfo.maLop);
+  };
+
+  const handleShowClassInfo = () => {
+    setShowModalClassInfo(true);
+  }
+
+  const handleCloseClassInfo = () => {
+    setShowModalClassInfo(false);
+  }
+
+  const fetchStudentList = async (classId) => {
+    try {
+      const studentListData = await getStudentListByClassId(classId);
+      setStudentList(studentListData);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách sinh viên", error);
+    }
+  }
 
   const handleWeekChange = (date) => {
     if (date) {
@@ -113,6 +142,7 @@ const DailySchedule = () => {
                       Mã môn: {lesson.monHoc.tenMon} ({lesson.monHoc.maMon})
                       <div className="lesson-buttons">
                         <Button onClick={() => handleRoomClick(lesson)}>Thông tin phòng</Button>
+                        <Button onClick={() => handleClassClick(lesson.lopHoc)}>Lớp học</Button>
                         <ScheduleUpdateForm 
                           selectedLesson={selectedLesson}
                           setSelectedLesson = {setSelectedLesson}
@@ -135,6 +165,13 @@ const DailySchedule = () => {
         roomInfo={selectedRoom}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      <ClassInfoModal 
+        show = {showModalClassInfo}
+        handleClose = {handleCloseClassInfo}
+        classInfo = {selectedClass}
+        studentList = {studentList}
       />
     </>
   );

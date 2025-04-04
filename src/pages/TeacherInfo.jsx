@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTeacherByUser } from "../services/teacherInfoService";
+import { getTeacherByUser } from "../services/userInfoService";
 import "../css/TeacherInfo.css"
 // import Header from "../components/Header";
 
